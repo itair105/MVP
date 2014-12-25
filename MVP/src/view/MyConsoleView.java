@@ -23,6 +23,7 @@ public class MyConsoleView implements View {
         System.out.println("* domain=[weightedGraph or weightlessGraph]");
         System.out.println("* algorithm=[bfs or dijkstra]");
         System.out.println("* displayState");
+        System.out.println("* is_calculating");
         System.out.println("* start");
         String input;
 
@@ -37,18 +38,49 @@ public class MyConsoleView implements View {
     }
 
     @Override
-    public void displayCurrentState(GraphDomain domain) {
-        System.out.println(domain);
+    public void displayCurrentState(final GraphDomain domain) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println(domain);
+            }
+        }).start();
+
     }
 
     @Override
-    public void displaySolution(Solution solution) {
-        System.out.println(solution);
+    public void displaySolution(final Solution solution) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println(solution);
+            }
+        }).start();
     }
 
     @Override
     public String getUserAction() {
         return userAction;
+    }
+
+    @Override
+    public void displayError(final String error) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println(error);
+            }
+        }).start();
+
+    }
+
+    @Override
+    public void displayIsCalculating(boolean calculationRunning) {
+        if (calculationRunning) {
+            System.out.println("Model is calculating currently...");
+        } else {
+            System.out.println("Model is not calculating currently.");
+        }
     }
 
     @Override

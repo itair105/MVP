@@ -25,4 +25,20 @@ public final class WeightLessGraphDomain extends AbstractGraphDomain {
     public Map<String, Set<AbstractEdge>> getAdjacencies() {
         return adjacencies;
     }
+
+    @Override
+    public int hashCode() {
+        int i = 2000000000;
+        Set<String> nodeKeys = this.nodeMap.keySet();
+        for (String nodeKey : nodeKeys) {
+            i += nodeKey.hashCode();
+        }
+
+        Set<String> edgeKeys = this.edgeMap.keySet();
+        for (String edgeKey : edgeKeys) {
+            i += edgeKey.hashCode();
+        }
+
+        return i;
+    }
 }

@@ -10,4 +10,8 @@ public interface View extends Observable{
 
     void displaySolution(Solution solution);
     String getUserAction();
+
+    void displayError(String message);
+
+    void displayIsCalculating(boolean calculationRunning);
 }

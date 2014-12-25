@@ -31,4 +31,22 @@ public final class WeightGraphDomain extends AbstractGraphDomain {
     public Map<String, Set<AbstractEdge>> getAdjacencies() {
         return abstractAdjacencies;
     }
+
+    @Override
+    public int hashCode() {
+        int i = 0;
+        Set<String> nodeKeys = this.nodeMap.keySet();
+        for (String nodeKey : nodeKeys) {
+            i += nodeKey.hashCode();
+        }
+
+        Set<String> edgeKeys = this.edgeMap.keySet();
+        for (String edgeKey : edgeKeys) {
+            i += edgeKey.hashCode();
+            WeightedEdge weightedEdge = (WeightedEdge) edgeMap.get(edgeKey);
+            i += weightedEdge.weight;
+        }
+
+        return i;
+    }
 }

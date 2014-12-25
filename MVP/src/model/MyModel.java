@@ -3,23 +3,41 @@ package model;
 import common.Observer;
 import common.Utils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class MyModel implements Model {
     private GraphDomain domain;
     private AbstractSearcher searcher;
     private Solution solution;
     Set<Observer> listeners = new HashSet<Observer>();
+    Map<String, Solution> solutionMap = new HashMap<String, Solution>();
+    private Thread lastRunningThread = new Thread();
+    private Set<Thread> threads = new HashSet<Thread>();
+
+    @Override
+    public Map<String, Solution> getSolutionMap() {
+        return solutionMap;
+    }
+
+    @Override
+    public boolean isCalculationRunning() {
+        return lastRunningThread.isAlive();
+    }
 
     @Override
     public void selectDomain(String domainName) {
         if (domainName.equals("weightedGraph")) {
             domain = createWeightedGraph();
-
         } else if (domainName.equals("weightlessGraph")) {
             domain = createWeightLessGraph();
+        } else {
+            throw new IllegalArgumentException("no such domain name");
+        }
+
+        System.out.println(domain.hashCode());
+
+        if (searcher != null) {
+            searcher.setDomain(domain);
         }
     }
 
@@ -34,12 +52,27 @@ public class MyModel implements Model {
 
     @Override
     public void solveDomain() {
-        long time = System.currentTimeMillis();
-        solution = new Solution(searcher.search());
-        long time2 = System.currentTimeMillis();
-        long timePast = time2 - time;
-        System.out.println("solution took  " + timePast + " ms");
-        notifyObservers();
+        lastRunningThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                long time = System.currentTimeMillis();
+                String hashCode = String.valueOf(domain.hashCode());
+                if (solutionMap.containsKey(hashCode)) {
+                    solution = solutionMap.get(hashCode);
+                } else {
+                    solution = new Solution(searcher.search(), hashCode);
+                    solutionMap.put(hashCode, solution);
+                }
+
+                long time2 = System.currentTimeMillis();
+                long timePast = time2 - time;
+                System.out.println("solution took  " + timePast + " ms");
+                notifyObservers();
+            }
+        });
+
+        lastRunningThread.start();
+        threads.add(lastRunningThread);
     }
 
     @Override
@@ -50,6 +83,14 @@ public class MyModel implements Model {
     @Override
     public GraphDomain getDomain() {
         return domain;
+    }
+
+    @Override
+    public void stopCalculating() {
+        for (Thread thread : threads) {
+            thread.stop();
+        }
+
     }
 
     @Override

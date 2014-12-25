@@ -44,8 +44,22 @@ public class BFSSearcher extends AbstractSearcher{
     }
 
     public List<Node> search() {
+        markedNodes.clear();
+        edgeTo.clear();
+        minDistances.clear();
+
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         findShortestPaths();
         return getShortestPath();
+    }
+
+    @Override
+    public void setDomain(GraphDomain domain) {
+        this.graphDomain = domain;
     }
 
     // breadth-first search from a single source

@@ -1,14 +1,26 @@
 package model;
 
+import java.io.Serializable;
 import java.util.List;
 
-/**
- * Created by user on 12/13/2014.
- */
-public class Solution {
+public class Solution implements Serializable {
     List<Node> path;
+    private String problem;
 
-    public Solution(List<Node> path) {
+    public String getProblem() {
+        return problem;
+    }
+
+    public void setProblem(String problem) {
+        this.problem = problem;
+    }
+
+    public Solution() {
+    }
+
+    public Solution(List<Node> path, String problem)
+    {
+        this.problem = problem;
         this.path = path;
     }
 
@@ -25,5 +37,9 @@ public class Solution {
         return "Solution{" +
                 "path=" + path +
                 '}';
+    }
+
+    public void setPath(List<Node> path) {
+        this.path = path;
     }
 }

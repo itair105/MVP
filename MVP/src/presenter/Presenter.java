@@ -6,16 +6,16 @@ import common.Observer;
 import common.Utils;
 import model.Model;
 import model.MyModel;
+import model.Solution;
 import view.MyConsoleView;
 import view.View;
 
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by user on 12/13/2014.
- */
 public class Presenter implements Observer {
+    public static final String SOLUTION_FILE = "c:/solutions/solutions.txt";
     private Model model;
     private View view;
     Map<String, Command> stringCommandMap = new HashMap<String, Command>();
@@ -33,7 +33,11 @@ public class Presenter implements Observer {
         stringCommandMap.put("domain", new Command() {
             @Override
             public void doCommand(String param) {
-                model.selectDomain(param);
+                try {
+                    model.selectDomain(param);
+                } catch (IllegalArgumentException e) {
+                    view.displayError(e.getMessage());
+                }
             }
         });
 
@@ -50,6 +54,13 @@ public class Presenter implements Observer {
                 view.displayCurrentState(model.getDomain());
             }
         });
+
+        stringCommandMap.put("is_calculating", new Command() {
+            @Override
+            public void doCommand(String param) {
+                view.displayIsCalculating(model.isCalculationRunning());
+            }
+        });
     }
 
     @Override
@@ -63,7 +74,11 @@ public class Presenter implements Observer {
             }
 
             Command command = stringCommandMap.get(commandType);
-            command.doCommand(commandParam);
+            if (command != null) {
+                command.doCommand(commandParam);
+            } else {
+                view.displayError("No such command");
+            }
         } else  if (observable == model) {
             view.displaySolution(model.getSolution());
         }
@@ -76,8 +91,61 @@ public class Presenter implements Observer {
         Presenter presenter = new Presenter(view, model);
         view.addObserver(presenter);
         model.addObserver(presenter);
+
+        presenter.loadSolutions();
         view.start();
+        model.stopCalculating();
+        presenter.saveSolutions();
     }
 
+    private void loadSolutions() {
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(SOLUTION_FILE);
+            while (true) {
+                ObjectInputStream ois = new ObjectInputStream(fis);
+                Solution solution = (Solution) ois.readObject();
+                model.getSolutionMap().put(String.valueOf(solution.getProblem().hashCode()), solution);
+            }
+        } catch (EOFException ignored) {
+            // as expected
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fis != null)
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
 
+    }
+
+    private void saveSolutions() {
+
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(SOLUTION_FILE);
+            for (Solution solution : model.getSolutionMap().values()) {
+                ObjectOutputStream oos = new ObjectOutputStream(fos);
+                oos.writeObject(solution);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fos != null)
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
+    }
 }

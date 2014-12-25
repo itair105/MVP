@@ -54,8 +54,15 @@ public class DijkstraSearcher extends AbstractSearcher
     }
 
     public List<Node> search() {
+        previousNodeMap.clear();
+        minDistances.clear();
         computePaths();
         return getShortestPath();
+    }
+
+    @Override
+    public void setDomain(GraphDomain domain) {
+        this.domain = (WeightGraphDomain)domain;
     }
 }
 

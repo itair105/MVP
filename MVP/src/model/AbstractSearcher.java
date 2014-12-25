@@ -8,4 +8,5 @@ import java.util.List;
 public abstract class AbstractSearcher {
     public abstract List<Node> search();
 
+    public abstract void setDomain(GraphDomain domain);
 }
